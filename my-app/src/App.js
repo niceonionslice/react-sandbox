@@ -19,6 +19,14 @@ class App extends Component {
     // ↓ stateを変更するために用意したこのaddTodoメソッドはAppコンポーネントではなく別のコンポーネントが呼びます。この時呼び出し側がAppコンポーネントではないので
     // stateもtodoListもないという状態になってしまいます。bind(this)を呼び出すことで常にAppコンポーネントを参照することを強制することができるようです。
     this.addTodo = this.addTodo.bind(this);
+    this.resetTodo = this.resetTodo.bind(this);
+  }
+
+  // todoをすべてクリアーするためにメソッド
+  resetTodo() {
+    this.setState({
+      tasks: []
+    })
   }
 
   // addTaskメソッドはTodoInputでもTodoListでもなくAppコンポーネントに定義する。
@@ -62,6 +70,7 @@ class App extends Component {
     return (
       <div className="App">
         <h1>TODO App</h1>
+        <button onClick={this.resetTodo}>クリア</button>
         <TodoInput addTodo={this.addTodo}/>
         <TodoList tasks={this.state.tasks} />
       </div>
