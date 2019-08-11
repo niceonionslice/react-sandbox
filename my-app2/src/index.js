@@ -1,59 +1,85 @@
+import React from 'react';
+import { render } from 'react-dom';
 import { createStore } from 'redux';
 
-
-// Taskの初期状態
-const initialState = {
+// 監理するものの初期状態
+const initialState =  {
+  task: '',
   tasks: [],
 };
 
-// tasksReducerの定義
-// Reduxの第一引数には現在の状態を示すstateオブジェクトが渡ってきます。
-// 初期状態としてinitialStateを代入します。
-// Actionオブジェクトが渡されている。actionで渡されるオブジェクトはこんな感じ
-// {
-//   type: 'ADD_TASK',
-//   payload: {
-//     task: 'Reducerを学ぶ'
-//   }
-// }
+// Reducerを定義する。状態としてINPUT_TASKとADD_TASKを定義
 function tasksReducer(state = initialState, action) {
+  // 状態監理というからこの形にしたけど、全部switchで定義するとなると人間の頭がおかしくなるよね。
   switch (action.type) {
+    case 'INPUT_TASK':
+    return {
+      ...state,
+      task: action.payload.task
+    };
     case 'ADD_TASK':
-      return {
-        ...state,
-        // tasks: state.tasks.concat([action.task]) //← 教科書はこれですが、payloadオブジェクトの中を追加するので下に記述を変更
-        tasks: state.tasks.concat([action.payload.task])
-      };
+    return {
+      ...state,
+      tasks: state.tasks.concat([action.payload.task])
+    };
     default:
-      return state;
+    return state;
   }
-};
+}
 
-// ReduxにはcreateStoreという関数を持っており、これを実行することでStoreを生成することができます。
-// これで作成されたStoreはアプリケーションで唯一のものとなります。
-// アプリケーション全体をこのStoreで管理することになります。
+// 状態を監理するためのstoreを定義
 const store = createStore(tasksReducer);
+store.subscribe(() => console.log(store.getState()));
 
-// ActionCreatorを定義する
-const addTask = (task) => ({
-  type: 'ADD_TASK',
-  payload: {task}
+
+
+// 初回のタスクを追加するためのオブジェクトかな。
+const inputTask = (task) => ({
+  type: 'INPUT_TASK',
+  payload: {
+    task
+  },
 });
 
-// subscribe...申し込みとか購読するという意味
-store.dispatch(addTask('Storeをもっと学ぶ'));
+// タスクを追加するためのオブジェクトかな。
+const addTask = (task) => ({
+  type: 'ADD_TASK',
+  payload: {
+    task
+  },
+});
 
-function handleChange() {
-  console.log(store.getState());
-};
 
-// これはStoreが変更担った時に呼び出すことができるコーブバック関数を定義する。
-// 今回はhandleChange関数を登録して内部でconsole.logを呼び出す。
-store.subscribe(handleChange);
+// renderで表示するためのviewを定義
+//textを入力する毎にStoreのtaskが状態変化する。
+//buttonをクリックしたタイミングでtasksのリストにタスクを追加する。
+function TodoApp({ store }) {
+  const { task, tasks } = store.getState();
+  return (
+    <div>
+    <input type='text' onChange={(e) => store.dispatch(inputTask(e.target.value))} />
+    <input type='button' value='add' onClick={(e) => store.dispatch(addTask(task))} />
+    <ul>
+      {
+        tasks.map(function(item, i) {
+          return (
+            <li key={i}>{item}</li>
+          );
+        })
+      }
+    </ul>
+    </div>
+  );
+}
 
-store.dispatch(addTask('もっとStoreを学ぶ'));
-store.dispatch(addTask('もっともっとStoreを学ぶ'));
-store.dispatch(addTask('もっともっともっとStoreを学ぶ'));
-store.dispatch(addTask('もっともっともっともっとStoreを学ぶ'));
-store.dispatch(addTask('もっともっともっともっともっとStoreを学ぶ'));
-store.dispatch(addTask('もっともっともっともっともっともっともっとStoreを学ぶ'));
+
+function renderApp(store) {
+  render(
+    <TodoApp store={store} />,
+    document.getElementById('root')
+  );
+}
+// viewに描画する。
+store.subscribe(() => renderApp(store));
+// 初回表示するために呼び出しが必要
+renderApp(store);
