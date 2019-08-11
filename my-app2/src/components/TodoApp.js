@@ -1,0 +1,26 @@
+import React from 'react';
+import { inputTask, addTask } from '../actions/tasks';
+
+// renderで表示するためのviewを定義
+//textを入力する毎にStoreのtaskが状態変化する。
+//buttonをクリックしたタイミングでtasksのリストにタスクを追加する。
+function TodoApp({ store }) {
+  const { task, tasks } = store.getState();
+  return (
+    <div>
+    <input type='text' onChange={(e) => store.dispatch(inputTask(e.target.value))} />
+    <input type='button' value='add' onClick={(e) => store.dispatch(addTask(task))} />
+    <ul>
+      {
+        tasks.map(function(item, i) {
+          return (
+            <li key={i}>{item}</li>
+          );
+        })
+      }
+    </ul>
+    </div>
+  );
+}
+
+export default TodoApp;
